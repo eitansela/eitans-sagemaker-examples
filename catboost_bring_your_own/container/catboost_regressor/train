@@ -4,70 +4,102 @@
 # This implementation works in File mode and makes no assumptions about the input file names.
 # Input is specified as CSV with a data point in each row and the labels in the first column.
 
-from __future__ import print_function
-
-import argparse
 import logging
 import os
 import json
+import traceback
+import sys
 
 from catboost import CatBoostRegressor
 import numpy as np
 import pandas as pd
 
+prefix = '/opt/ml/'
+input_path = prefix + 'input/data'
+train_channel_name = 'train'
+test_channel_name = 'test'
+
+output_path = os.path.join(prefix, 'output')
+model_path = os.path.join(prefix, 'model')
+model_file_name = 'catboost-regressor-model.dump'
+train_path = os.path.join(input_path, train_channel_name)
+test_path = os.path.join(input_path, test_channel_name)
+
+param_path = os.path.join(prefix, 'input/config/hyperparameters.json')
 
 
-if __name__ =='__main__':
+# The function to execute the training.
+def train():
+    print('Starting the training.')
 
-    # These are the paths to where SageMaker mounts interesting things in your container.
+    try:
+        # Read in any hyperparameters that the user passed with the training job
+        print('Reading hyperparameters data: {}'.format(param_path))
+        with open(param_path) as json_file:
+            hyperparameters_data = json.load(json_file)
+        print('hyperparameters_data: {}'.format(hyperparameters_data))
 
-    prefix = '/opt/ml/'
-    input_path = prefix + 'input/data'
-    print('input_path: {}'.format(input_path))
-       
-    print('reading data from train')
-    for file1 in os.listdir(input_path+'/train/'):
-        print(file1)
+        # Take the set of train files and read them all into a single pandas dataframe
+        train_input_files = [os.path.join(train_path, file) for file in os.listdir(train_path)]
+        if len(train_input_files) == 0:
+            raise ValueError(('There are no files in {}.\n' +
+                              'This usually indicates that the channel ({}) was incorrectly specified,\n' +
+                              'the data specification in S3 was incorrectly specified or the role specified\n' +
+                              'does not have permission to access the data.').format(train_path, train_channel_name))
+        print('Found train files: {}'.format(train_input_files))
+        raw_data = [pd.read_csv(file) for file in train_input_files]
+        train_df = pd.concat(raw_data)
 
-    print('reading data from test')
-    for file1 in os.listdir(input_path+'/test/'):
-        print(file1)
-    
-    param_path = os.path.join(prefix, 'input/config/hyperparameters.json')
-    print('param_path: {}'.format(param_path))
-    
-    output_path = os.path.join(prefix, 'output')
-    model_path = os.path.join(prefix, 'model')
-    
-    with open(param_path) as json_file:
-        hyperparameters_data = json.load(json_file)
-    print('hyperparameters_data: {}'.format(hyperparameters_data))
-    
-    train_df = pd.read_csv(os.path.join(input_path+'/train/', 'boston_train.csv'))
-    test_df = pd.read_csv(os.path.join(input_path+'/test/', 'boston_test.csv'))
-    
-    logging.info('building training and testing datasets')
-    X_train = train_df[hyperparameters_data['features'].split()]
-    X_test = test_df[hyperparameters_data['features'].split()]
-    y_train = train_df[hyperparameters_data['target']]
-    y_test = test_df[hyperparameters_data['target']]
-        
-    # define and train model
-    model = CatBoostRegressor()
-    
-    model.fit(X_train, y_train, eval_set=(X_test, y_test), logging_level='Silent') 
-    
-    # print abs error
-    logging.info('validating model')
-    abs_err = np.abs(model.predict(X_test) - y_test)
+        # Take the set of train files and read them all into a single pandas dataframe
+        test_input_files = [os.path.join(test_path, file) for file in os.listdir(test_path)]
+        if len(test_input_files) == 0:
+            raise ValueError(('There are no files in {}.\n' +
+                              'This usually indicates that the channel ({}) was incorrectly specified,\n' +
+                              'the data specification in S3 was incorrectly specified or the role specified\n' +
+                              'does not have permission to access the data.').format(test_path, train_channel_name))
+        print('Found test files: {}'.format(test_input_files))
+        raw_data = [pd.read_csv(file) for file in test_input_files]
+        test_df = pd.concat(raw_data)
 
-    # print couple perf metrics
-    for q in [10, 50, 90]:
-        logging.info('AE-at-' + str(q) + 'th-percentile: '
-              + str(np.percentile(a=abs_err, q=q)))
-    
-    # persist model
-    path = os.path.join(model_path, 'catboost-regressor-model.dump')
-    print('saving to {}'.format(path))
-    model.save_model(path)
-    print('Training complete.')
+        logging.info('building training and testing datasets')
+        X_train = train_df[hyperparameters_data['features'].split()]
+        X_test = test_df[hyperparameters_data['features'].split()]
+        y_train = train_df[hyperparameters_data['target']]
+        y_test = test_df[hyperparameters_data['target']]
+
+        # define and train model
+        model = CatBoostRegressor()
+
+        model.fit(X_train, y_train, eval_set=(X_test, y_test), logging_level='Silent')
+
+        # print abs error
+        logging.info('validating model')
+        abs_err = np.abs(model.predict(X_test) - y_test)
+
+        # print couple perf metrics
+        for q in [10, 50, 90]:
+            print('AE-at-' + str(q) + 'th-percentile: '+ str(np.percentile(a=abs_err, q=q)))
+
+        # persist model
+        path = os.path.join(model_path, model_file_name)
+        print('saving model file to {}'.format(path))
+        model.save_model(path)
+
+        print('Training complete.')
+    except Exception as e:
+        # Write out an error file. This will be returned as the failureReason in the
+        # DescribeTrainingJob result.
+        trc = traceback.format_exc()
+        with open(os.path.join(output_path, 'failure'), 'w') as s:
+            s.write('Exception during training: ' + str(e) + '\n' + trc)
+        # Printing this causes the exception to be in the training job logs, as well.
+        print('Exception during training: ' + str(e) + '\n' + trc)
+        # A non-zero exit code causes the training job to be marked as Failed.
+        sys.exit(255)
+
+
+if __name__ == '__main__':
+    train()
+
+    # A zero exit code causes the job to be marked a Succeeded.
+    sys.exit(0)

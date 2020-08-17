@@ -43,9 +43,6 @@ class ScoringService(object):
                 one prediction per row in the dataframe"""
         clf = cls.get_model()
         
-        print (input)
-        print (input.dtypes)
-        
         input.rename(columns={0:'ID',
                               1:'CRIM',
                               2:'ZN',
@@ -61,9 +58,6 @@ class ScoringService(object):
                               12:'B',
                               13:'LSTAT'}, 
                  inplace=True)
-        
-        print (input)
-        print (input.dtypes)
         
         return clf.predict(input)
 
