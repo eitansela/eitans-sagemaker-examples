@@ -1,6 +1,6 @@
 # Bring-your-own Algorithm Sample
 
-This example shows how to package an algorithm for use with SageMaker. We have chosen a simple [scikit-learn][skl] implementation of decision trees to illustrate the procedure.
+This example shows how to package an algorithm for use with SageMaker. We have chosen a simple [CatBoost][catboost] implementation of decision trees to illustrate the procedure.
 
 SageMaker supports two execution modes: _training_ where the algorithm uses input data to train a new model and _serving_ where the algorithm accepts HTTP requests and uses the previously trained model to do an inference (also called "scoring", "prediction", or "transformation").
 
@@ -64,7 +64,7 @@ can be supplied as part of the CreateModel API call.
     timeout                  MODEL_SERVER_TIMEOUT              60 seconds
 
 
-[skl]: http://scikit-learn.org "scikit-learn Home Page"
+[catboost]: https://catboost.ai/ "CatBoost Home Page"
 [dockerfile]: https://docs.docker.com/engine/reference/builder/ "The official Dockerfile reference guide"
 [ecr]: https://aws.amazon.com/ecr/ "ECR Home Page"
 [nginx]: http://nginx.org/
