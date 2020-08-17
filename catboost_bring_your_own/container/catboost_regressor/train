@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+# A sample training component that trains a simple CatBoost Regressor tree model.
+# This implementation works in File mode and makes no assumptions about the input file names.
+# Input is specified as CSV with a data point in each row and the labels in the first column.
+
+from __future__ import print_function
+
+import argparse
+import logging
+import os
+import json
+
+from catboost import CatBoostRegressor
+import numpy as np
+import pandas as pd
+
+
+
+if __name__ =='__main__':
+
+    # These are the paths to where SageMaker mounts interesting things in your container.
+
+    prefix = '/opt/ml/'
+    input_path = prefix + 'input/data'
+    print('input_path: {}'.format(input_path))
+       
+    print('reading data from train')
+    for file1 in os.listdir(input_path+'/train/'):
+        print(file1)
+
+    print('reading data from test')
+    for file1 in os.listdir(input_path+'/test/'):
+        print(file1)
+    
+    param_path = os.path.join(prefix, 'input/config/hyperparameters.json')
+    print('param_path: {}'.format(param_path))
+    
+    output_path = os.path.join(prefix, 'output')
+    model_path = os.path.join(prefix, 'model')
+    
+    with open(param_path) as json_file:
+        hyperparameters_data = json.load(json_file)
+    print('hyperparameters_data: {}'.format(hyperparameters_data))
+    
+    train_df = pd.read_csv(os.path.join(input_path+'/train/', 'boston_train.csv'))
+    test_df = pd.read_csv(os.path.join(input_path+'/test/', 'boston_test.csv'))
+    
+    logging.info('building training and testing datasets')
+    X_train = train_df[hyperparameters_data['features'].split()]
+    X_test = test_df[hyperparameters_data['features'].split()]
+    y_train = train_df[hyperparameters_data['target']]
+    y_test = test_df[hyperparameters_data['target']]
+        
+    # define and train model
+    model = CatBoostRegressor()
+    
+    model.fit(X_train, y_train, eval_set=(X_test, y_test), logging_level='Silent') 
+    
+    # print abs error
+    logging.info('validating model')
+    abs_err = np.abs(model.predict(X_test) - y_test)
+
+    # print couple perf metrics
+    for q in [10, 50, 90]:
+        logging.info('AE-at-' + str(q) + 'th-percentile: '
+              + str(np.percentile(a=abs_err, q=q)))
+    
+    # persist model
+    path = os.path.join(model_path, 'catboost-regressor-model.dump')
+    print('saving to {}'.format(path))
+    model.save_model(path)
+    print('Training complete.')
