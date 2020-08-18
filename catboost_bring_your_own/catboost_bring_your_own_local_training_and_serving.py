@@ -1,9 +1,12 @@
 # This is a sample training Python program that trains a simple CatBoost Regressor tree model.
-# This implementation will work on your local computer.
+# This implementation will work on your *local computer*.
+#
 # Prerequisites:
 #   1. Install required Python packages:
 #       pip install boto3 sagemaker 'sagemaker[local]' pandas scikit-learn
 #   2. Docker Desktop has to be installed on your computer, and running.
+#   3. Run:
+#       docker build  -t sagemaker-catboost-regressor-local .
 
 import boto3
 from sagemaker.local import LocalSession
