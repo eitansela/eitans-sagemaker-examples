@@ -1,6 +1,6 @@
 # Bring-your-own Algorithm Sample
 
-This example shows how to package an algorithm for use with SageMaker. We have chosen a simple [CatBoost][catboost] implementation of decision trees to illustrate the procedure.
+This example shows how to package an algorithm for use with SageMaker. We have chosen a simple [CatBoost][catboost] implementation of regression to illustrate the procedure.
 
 SageMaker supports two execution modes: _training_ where the algorithm uses input data to train a new model and _serving_ where the algorithm accepts HTTP requests and uses the previously trained model to do an inference (also called "scoring", "prediction", or "transformation").
 
@@ -20,7 +20,7 @@ The components are as follows:
 
 * __build\_and\_push.sh__: The script to build the Docker image (using the Dockerfile above) and push it to the [Amazon EC2 Container Registry (ECR)][ecr] so that it can be deployed to SageMaker. Specify the name of the image as the argument to this script. The script will generate a full name for the repository in your account and your configured AWS region. If this ECR repository doesn't exist, the script will create it.
 
-* __decision-trees__: The directory that contains the application to run in the container. See the next session for details about each of the files.
+* __catboost_regressor__: The directory that contains the application to run in the container. See the next session for details about each of the files.
 
 * __local-test__: A directory containing scripts and a setup for running a simple training and inference jobs locally so that you can test that everything is set up correctly. See below for details.
 
