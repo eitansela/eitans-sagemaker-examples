@@ -1,5 +1,10 @@
-# This is a sample training Python program that trains a simple CatBoost Regressor tree model.
-# This implementation will work on your *local computer*.
+# This is a sample Python program using SageMaker local mode, that trains a simple CatBoost Regressor model, and then performs inference.
+#
+# The SageMaker Python SDK supports local mode, which allows you to create estimators and deploy them to your local environment. 
+# This is a great way to test your deep learning scripts before running them in SageMaker’s managed training or hosting environments. 
+# Local Mode is supported for frameworks images (TensorFlow, MXNet, Chainer, PyTorch, and Scikit-Learn) and images you supply yourself.
+# 
+# This example will work on your local computer.
 #
 # Prerequisites:
 #   1. Install required Python packages:
