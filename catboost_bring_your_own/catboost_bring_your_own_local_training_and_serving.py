@@ -59,8 +59,8 @@ local_regressor.fit({'train':train_location, 'test': test_location}, logs=True)
 
 predictor = local_regressor.deploy(1, 'local', serializer=csv_serializer)
 
-csv_predictions_file = './data/boston_test_set.csv'
-testX.drop(['target'], axis=1).to_csv(csv_predictions_file, header=False)
+csv_predictions_file = './data/boston_test_no_target_feature.csv'
+testX.drop(['target'], axis=1).to_csv(csv_predictions_file, header=False, index=False)
 
 with open(csv_predictions_file, 'r') as f:
     payload = f.read().strip()
