@@ -61,11 +61,12 @@ def train():
         raw_data = [pd.read_csv(file) for file in test_input_files]
         test_df = pd.concat(raw_data)
 
+        # Assumption is that the label is the last column
         logging.info('building training and testing datasets')
-        X_train = train_df[hyperparameters_data['features'].split()]
-        X_test = test_df[hyperparameters_data['features'].split()]
-        y_train = train_df[hyperparameters_data['target']]
-        y_test = test_df[hyperparameters_data['target']]
+        X_train = train_df.iloc[:, :-1].values
+        y_train = train_df.iloc[:, -1:].values
+        X_test = test_df.iloc[:, :-1].values
+        y_test = test_df.iloc[:, -1:].values
 
         # define and train model
         model = CatBoostRegressor()

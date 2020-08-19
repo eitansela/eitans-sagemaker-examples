@@ -42,23 +42,6 @@ class ScoringService(object):
             input (a pandas dataframe): The data on which to do the predictions. There will be
                 one prediction per row in the dataframe"""
         clf = cls.get_model()
-        
-        input.rename(columns={0:'ID',
-                              1:'CRIM',
-                              2:'ZN',
-                              3:'INDUS',
-                              4:'CHAS',
-                              5:'NOX',
-                              6:'RM',
-                              7:'AGE',
-                              8:'DIS',
-                              9:'RAD',
-                              10:'TAX',
-                              11:'PTRATIO',
-                              12:'B',
-                              13:'LSTAT'}, 
-                 inplace=True)
-        
         return clf.predict(input)
 
 # The flask app for serving predictions

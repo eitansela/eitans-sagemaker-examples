@@ -1,10 +1,5 @@
-# This is a sample Python program using SageMaker local mode, that trains a simple CatBoost Regressor model, and then performs inference.
-#
-# The SageMaker Python SDK supports local mode, which allows you to create estimators and deploy them to your local environment. 
-# This is a great way to test your deep learning scripts before running them in SageMaker’s managed training or hosting environments. 
-# Local Mode is supported for frameworks images (TensorFlow, MXNet, Chainer, PyTorch, and Scikit-Learn) and images you supply yourself.
-# 
-# This example will work on your local computer.
+# This is a sample training Python program that trains a simple CatBoost Regressor tree model.
+# This implementation will work on your *local computer*.
 #
 # Prerequisites:
 #   1. Install required Python packages:
@@ -12,6 +7,8 @@
 #   2. Docker Desktop has to be installed on your computer, and running.
 #   3. Open terminal and run the following commands:
 #       docker build  -t sagemaker-catboost-regressor-local container/.
+#   4. Create AmazonSageMaker-ExecutionRole. For More Details: https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html
+
 
 import boto3
 from sagemaker.local import LocalSession
@@ -43,8 +40,8 @@ testX['target'] = y_test
 local_train = './data/train/boston_train.csv'
 local_test = './data/test/boston_test.csv'
 
-trainX.to_csv(local_train)
-testX.to_csv(local_test)
+trainX.to_csv(local_train, header=None, index=False)
+testX.to_csv(local_test, header=None, index=False)
 
 account = sagemaker_session.boto_session.client('sts').get_caller_identity()['Account']
 region = sagemaker_session.boto_session.region_name
@@ -54,9 +51,7 @@ local_regressor = Estimator(
     image,
     role,
     train_instance_count=1,
-    train_instance_type="local",
-    hyperparameters={'features': 'CRIM ZN INDUS CHAS NOX RM AGE DIS RAD TAX PTRATIO B LSTAT',
-                     'target': 'target'})
+    train_instance_type="local")
 
 train_location = 'file://./data/train/boston_train.csv'
 test_location = 'file://./data/test/boston_test.csv'
