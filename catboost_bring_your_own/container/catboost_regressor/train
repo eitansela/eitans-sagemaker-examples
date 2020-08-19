@@ -62,7 +62,7 @@ def train():
         test_df = pd.concat(raw_data)
 
         # Assumption is that the label is the last column
-        logging.info('building training and testing datasets')
+        print('building training and testing datasets')
         X_train = train_df.iloc[:, :-1].values
         y_train = train_df.iloc[:, -1:].values
         X_test = test_df.iloc[:, :-1].values
@@ -74,7 +74,7 @@ def train():
         model.fit(X_train, y_train, eval_set=(X_test, y_test), logging_level='Silent')
 
         # print abs error
-        logging.info('validating model')
+        print('validating model')
         abs_err = np.abs(model.predict(X_test) - y_test)
 
         # print couple perf metrics
