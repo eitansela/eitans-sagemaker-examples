@@ -4,6 +4,7 @@
 # Prerequisites:
 #   1. Install required Python packages:
 #       pip install boto3 sagemaker==1.71.0 'sagemaker[local]' pandas scikit-learn
+#       pip install 'sagemaker[local]'
 #   2. Docker Desktop has to be installed on your computer, and running.
 #   3. Open terminal and run the following commands:
 #       docker build  -t sagemaker-catboost-regressor-local container/.
