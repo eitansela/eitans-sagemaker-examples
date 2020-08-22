@@ -6,15 +6,14 @@ from __future__ import print_function
 import os
 import json
 import pickle
-import StringIO
 import sys
 import signal
 import traceback
-
+import io
 import flask
 
 import pandas as pd
-from catboost import CatBoostRegressor
+import lightgbm as lgb
 
 prefix = '/opt/ml/'
 model_path = os.path.join(prefix, 'model')
@@ -30,8 +29,7 @@ class ScoringService(object):
     def get_model(cls):
         """Get the model object for this instance, loading it if it's not already loaded."""
         if cls.model == None:
-            cls.model = CatBoostRegressor()
-            cls.model.load_model(os.path.join(model_path, 'catboost-regressor-model.dump'))
+            cls.model = lgb.Booster(model_file=os.path.join(model_path, 'lightgbm-regression-model.txt'))
         return cls.model
 
     @classmethod
@@ -74,7 +72,7 @@ def transformation():
     # Convert from CSV to pandas
     if flask.request.content_type == 'text/csv':
         data = flask.request.data.decode('utf-8')
-        s = StringIO.StringIO(data)
+        s = io.StringIO(data)
         data = pd.read_csv(s, header=None)
     else:
         return flask.Response(response='This predictor only supports CSV data', status=415, mimetype='text/plain')
@@ -85,7 +83,7 @@ def transformation():
     predictions = ScoringService.predict(data)
 
     # Convert from numpy back to CSV
-    out = StringIO.StringIO()
+    out = io.StringIO()
     pd.DataFrame({'results': predictions}).to_csv(out, header=False, index=False)
     result = out.getvalue()
 
