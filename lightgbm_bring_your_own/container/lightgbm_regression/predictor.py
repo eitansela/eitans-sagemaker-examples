@@ -40,10 +40,6 @@ class ScoringService(object):
             input (a pandas dataframe): The data on which to do the predictions. There will be
                 one prediction per row in the dataframe"""
         clf = cls.get_model()
-
-        print(input)
-        print(input.dtypes)
-
         return clf.predict(input)
 
 
