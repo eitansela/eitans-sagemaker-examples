@@ -28,19 +28,23 @@ region = sagemaker_session.boto_session.region_name
 
 data = load_boston()
 
-X_train, X_test, y_train, y_test = train_test_split(
-    data.data, data.target, test_size=0.25, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(data.data, data.target, test_size=0.25, random_state=45)
+X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, random_state=45)
 
 trainX = pd.DataFrame(X_train, columns=data.feature_names)
 trainX['target'] = y_train
 
+valX = pd.DataFrame(X_test, columns=data.feature_names)
+valX['target'] = y_test
+
 testX = pd.DataFrame(X_test, columns=data.feature_names)
-testX['target'] = y_test
 
 local_train = './data/train/boston_train.csv'
+local_validation = './data/validation/boston_validation.csv'
 local_test = './data/test/boston_test.csv'
 
 trainX.to_csv(local_train, header=None, index=False)
+valX.to_csv(local_validation, header=None, index=False)
 testX.to_csv(local_test, header=None, index=False)
 
 account = sagemaker_session.boto_session.client('sts').get_caller_identity()['Account']
@@ -62,15 +66,12 @@ local_lightgbm = Estimator(
             'verbose': 0})
 
 train_location = 'file://./data/train/boston_train.csv'
-test_location = 'file://./data/test/boston_test.csv'
-local_lightgbm.fit({'train':train_location, 'test': test_location}, logs=True)
+validation_location = 'file://./data/validation/boston_validation.csv'
+local_lightgbm.fit({'train':train_location, 'validation': validation_location}, logs=True)
 
 predictor = local_lightgbm.deploy(1, 'local', serializer=csv_serializer)
 
-csv_predictions_file = './data/boston_test_no_target_feature.csv'
-testX.drop(['target'], axis=1).to_csv(csv_predictions_file, header=False, index=False)
-
-with open(csv_predictions_file, 'r') as f:
+with open(local_test, 'r') as f:
     payload = f.read().strip()
 
 predicted = predictor.predict(payload).decode('utf-8')

@@ -17,13 +17,13 @@ import pandas as pd
 prefix = '/opt/ml/'
 input_path = prefix + 'input/data'
 train_channel_name = 'train'
-test_channel_name = 'test'
+validation_channel_name = 'validation'
 
 output_path = os.path.join(prefix, 'output')
 model_path = os.path.join(prefix, 'model')
 model_file_name = 'lightgbm-regression-model.txt'
 train_path = os.path.join(input_path, train_channel_name)
-test_path = os.path.join(input_path, test_channel_name)
+test_path = os.path.join(input_path, validation_channel_name)
 
 param_path = os.path.join(prefix, 'input/config/hyperparameters.json')
 
@@ -57,20 +57,20 @@ def train():
                               'This usually indicates that the channel ({}) was incorrectly specified,\n' +
                               'the data specification in S3 was incorrectly specified or the role specified\n' +
                               'does not have permission to access the data.').format(test_path, train_channel_name))
-        print('Found test files: {}'.format(test_input_files))
+        print('Found validation files: {}'.format(test_input_files))
         raw_data = [pd.read_csv(file) for file in test_input_files]
         test_df = pd.concat(raw_data)
 
         # Assumption is that the label is the last column
-        print('building training and testing datasets')
+        print('building training and validation datasets')
         X_train = train_df.iloc[:, :-1]
         y_train = train_df.iloc[:, -1:]
-        X_test = test_df.iloc[:, :-1]
-        y_test = test_df.iloc[:, -1:]
+        X_validation = test_df.iloc[:, :-1]
+        y_validation = test_df.iloc[:, -1:]
 
         # create dataset for lightgbm
         lgb_train = lgb.Dataset(X_train, y_train)
-        lgb_eval = lgb.Dataset(X_test, y_test, reference=lgb_train)
+        lgb_eval = lgb.Dataset(X_validation, y_validation, reference=lgb_train)
 
         # specify your configurations as a dict
         params = {
