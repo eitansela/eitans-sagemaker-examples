@@ -1,2 +1,13 @@
 
 .DS_Store
+.idea/eitans-sagemaker-examples.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+tensorflow_script_mode_training_and_serving/data/eval_data.npy
+tensorflow_script_mode_training_and_serving/data/eval_labels.npy
+tensorflow_script_mode_training_and_serving/data/train_data.npy
+tensorflow_script_mode_training_and_serving/data/train_labels.npy
+.idea/workspace.xml

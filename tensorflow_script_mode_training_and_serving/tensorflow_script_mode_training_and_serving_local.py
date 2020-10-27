@@ -1,38 +1,72 @@
 import boto3
+import os
 import numpy as np
 import sagemaker
 from sagemaker.tensorflow import TensorFlow
 from sagemaker.local import LocalSession
 
 
-sagemaker_session = LocalSession()
-sagemaker_session.config = {'local': {'local_code': True}}
+def download_traing_eval_data():
+    if os.path.isfile('./data/train_data.npy') and \
+            os.path.isfile('./data/train_labels.npy') and \
+            os.path.isfile('./data/eval_data.npy') and \
+            os.path.isfile('./data/eval_labels.npy'):
+        print('Training and evaluation datasets exist')
+    else:
+        print('Downloading training and evaluation dataset')
+        s3 = boto3.resource('s3')
+        s3.meta.client.download_file('sagemaker-sample-data-us-east-1', 'tensorflow/mnist/train_data.npy',
+                                     './data/train_data.npy')
+        s3.meta.client.download_file('sagemaker-sample-data-us-east-1', 'tensorflow/mnist/train_labels.npy',
+                                     './data/train_labels.npy')
+        s3.meta.client.download_file('sagemaker-sample-data-us-east-1', 'tensorflow/mnist/eval_data.npy',
+                                     './data/eval_data.npy')
+        s3.meta.client.download_file('sagemaker-sample-data-us-east-1', 'tensorflow/mnist/eval_labels.npy',
+                                     './data/eval_labels.npy')
 
-iam = boto3.client('iam', region_name='us-east-1')
-role = iam.get_role(RoleName='AmazonSageMaker-ExecutionRole-20190829T190746')['Role']['Arn']
 
-region = sagemaker_session.boto_session.region_name
+def do_inference_on_local_endpoint(predictor):
+    print('Starting Inference on local mode endpoint')
+    train_data = np.load('./data/train_data.npy')
+    train_labels = np.load('./data/train_labels.npy')
 
-mnist_estimator2 = TensorFlow(entry_point='mnist_tf2.py',
-                             role=role,
-                             train_instance_count=1,
-                             train_instance_type='local',
-                             framework_version='2.1.0',
-                             py_version='py3',
-                             distributions={'parameter_server': {'enabled': True}})
+    predictions2 = predictor.predict(train_data[:50])
+    for i in range(0, 50):
+        prediction = predictions2['predictions'][i]
+        label = train_labels[i]
+        print('prediction is {}, label is {}, matched: {}'.format(prediction, label, prediction == label))
 
-mnist_estimator2.fit("file:////Users/eitans/WorkDocs/dev/PycharmProjects/amazon-sagemaker-examples/mnist")
+    predictor.delete_endpoint(predictor.endpoint)
+    predictor.delete_model()
 
-predictor2 = mnist_estimator2.deploy(initial_instance_count=1, instance_type='local')
 
-train_data = np.load('train_data.npy')
-train_labels = np.load('train_labels.npy')
+def main():
+    download_traing_eval_data()
 
-predictions2 = predictor2.predict(train_data[:50])
-for i in range(0, 50):
-    prediction = predictions2['predictions'][i]
-    label = train_labels[i]
-    print('prediction is {}, label is {}, matched: {}'.format(prediction, label, prediction == label))
+    sagemaker_session = LocalSession()
+    sagemaker_session.config = {'local': {'local_code': True}}
 
-predictor2.delete_endpoint(predictor2.endpoint)
-predictor2.delete_model()
+    iam = boto3.client('iam', region_name='us-east-1')
+    role = iam.get_role(RoleName='AmazonSageMaker-ExecutionRole-20190829T190746')['Role']['Arn']
+
+    region = sagemaker_session.boto_session.region_name
+
+    print('Starting model training')
+    mnist_estimator = TensorFlow(entry_point='mnist_tf2.py',
+                                 role=role,
+                                 instance_count=1,
+                                 instance_type='local',
+                                 framework_version='2.1.0',
+                                 py_version='py3',
+                                 distribution={'parameter_server': {'enabled': True}})
+
+    mnist_estimator.fit("file://./data/")
+
+    print('Deploying local mode endpoint')
+    predictor = mnist_estimator.deploy(initial_instance_count=1, instance_type='local')
+
+    do_inference_on_local_endpoint(predictor)
+
+
+if __name__ == "__main__":
+    main()
