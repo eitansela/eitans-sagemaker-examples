@@ -1,12 +1,11 @@
-import boto3
 import os
+import boto3
 import numpy as np
-import sagemaker
-from sagemaker.tensorflow import TensorFlow
 from sagemaker.local import LocalSession
+from sagemaker.tensorflow import TensorFlow
 
 
-def download_traing_eval_data():
+def download_training_and_eval_data():
     if os.path.isfile('./data/train_data.npy') and \
             os.path.isfile('./data/train_labels.npy') and \
             os.path.isfile('./data/eval_data.npy') and \
@@ -41,7 +40,7 @@ def do_inference_on_local_endpoint(predictor):
 
 
 def main():
-    download_traing_eval_data()
+    download_training_and_eval_data()
 
     sagemaker_session = LocalSession()
     sagemaker_session.config = {'local': {'local_code': True}}
