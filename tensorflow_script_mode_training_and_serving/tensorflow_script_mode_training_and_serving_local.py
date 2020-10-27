@@ -45,11 +45,9 @@ def main():
     sagemaker_session = LocalSession()
     sagemaker_session.config = {'local': {'local_code': True}}
 
-    iam = boto3.client('iam', region_name='us-east-1')
-    role = iam.get_role(RoleName='AmazonSageMaker-ExecutionRole-20190829T190746')['Role']['Arn']
-
-    region = sagemaker_session.boto_session.region_name
-
+    # For local training a dummy role will be sufficient
+    role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'
+  
     print('Starting model training')
     mnist_estimator = TensorFlow(entry_point='mnist_tf2.py',
                                  role=role,
