@@ -29,9 +29,9 @@ def do_inference_on_local_endpoint(predictor):
     train_data = np.load('./data/train_data.npy')
     train_labels = np.load('./data/train_labels.npy')
 
-    predictions2 = predictor.predict(train_data[:50])
+    predictions = predictor.predict(train_data[:50])
     for i in range(0, 50):
-        prediction = predictions2['predictions'][i]
+        prediction = predictions['predictions'][i]
         label = train_labels[i]
         print('prediction is {}, label is {}, matched: {}'.format(prediction, label, prediction == label))
 
@@ -47,7 +47,7 @@ def main():
 
     # For local training a dummy role will be sufficient
     role = 'arn:aws:iam::111111111111:role/service-role/AmazonSageMaker-ExecutionRole-20200101T000001'
-  
+
     print('Starting model training')
     mnist_estimator = TensorFlow(entry_point='mnist_tf2.py',
                                  role=role,
