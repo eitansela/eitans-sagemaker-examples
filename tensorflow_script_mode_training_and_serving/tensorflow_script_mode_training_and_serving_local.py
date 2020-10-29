@@ -35,9 +35,6 @@ def do_inference_on_local_endpoint(predictor):
         label = train_labels[i]
         print('prediction is {}, label is {}, matched: {}'.format(prediction, label, prediction == label))
 
-    predictor.delete_endpoint(predictor.endpoint)
-    predictor.delete_model()
-
 
 def main():
     download_training_and_eval_data()
@@ -63,6 +60,9 @@ def main():
     predictor = mnist_estimator.deploy(initial_instance_count=1, instance_type='local')
 
     do_inference_on_local_endpoint(predictor)
+
+    predictor.delete_endpoint(predictor.endpoint)
+    predictor.delete_model()
 
 
 if __name__ == "__main__":
