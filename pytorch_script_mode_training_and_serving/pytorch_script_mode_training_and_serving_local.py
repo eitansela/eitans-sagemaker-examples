@@ -8,15 +8,13 @@
 #   2. Docker Desktop has to be installed on your computer, and running.
 ##############################################################################################
 
-import sagemaker
-import boto3
 import os
+
 import numpy as np
-import torchvision, torch
-from utils_cifar import get_train_data_loader, get_test_data_loader, imshow, classes
-from sagemaker.pytorch import PyTorch
-from sagemaker.pytorch import PyTorchModel
+import torch
 from sagemaker.local import LocalSession
+from sagemaker.pytorch import PyTorch
+from utils_cifar import get_train_data_loader, get_test_data_loader, classes
 
 
 def download_training_data():
