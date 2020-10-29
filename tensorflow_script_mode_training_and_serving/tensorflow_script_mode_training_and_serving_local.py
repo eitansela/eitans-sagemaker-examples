@@ -1,3 +1,13 @@
+# This is a sample Python program that trains a simple TensorFlow CIFAR-10 model.
+# This implementation will work on your *local computer*.
+#
+# Prerequisites:
+#   1. Install required Python packages:
+#       pip tensorflow install boto3 sagemaker pandas
+#       pip install 'sagemaker[local]'
+#   2. Docker Desktop has to be installed on your computer, and running.
+##############################################################################################
+
 import os
 import boto3
 import numpy as np
