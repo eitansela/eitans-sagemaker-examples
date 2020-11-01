@@ -36,14 +36,20 @@ def download_training_and_eval_data():
 
 def do_inference_on_local_endpoint(predictor):
     print('Starting Inference on local mode endpoint')
+    correct_predictions = 0
+
     train_data = np.load('./data/train_data.npy')
     train_labels = np.load('./data/train_labels.npy')
 
     predictions = predictor.predict(train_data[:50])
     for i in range(0, 50):
-        prediction = predictions['predictions'][i]
+        prediction = np.argmax(predictions['predictions'][i])
         label = train_labels[i]
         print('prediction is {}, label is {}, matched: {}'.format(prediction, label, prediction == label))
+        if prediction == label:
+            correct_predictions = correct_predictions + 1
+
+    print('Calculated Accuracy from predictions: {}'.format(correct_predictions/50))
 
 
 def main():
