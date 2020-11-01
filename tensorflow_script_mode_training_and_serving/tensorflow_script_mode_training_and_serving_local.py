@@ -60,8 +60,8 @@ def main():
                                  role=role,
                                  instance_count=1,
                                  instance_type='local',
-                                 framework_version='2.1.0',
-                                 py_version='py3',
+                                 framework_version='2.3.0',
+                                 py_version='py37',
                                  distribution={'parameter_server': {'enabled': True}})
 
     mnist_estimator.fit("file://./data/")
