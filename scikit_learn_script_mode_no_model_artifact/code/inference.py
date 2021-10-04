@@ -7,7 +7,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
-# Perform prediction on the deserialized object, with the loaded model
+# Perform average calculation on the deserialized array objects
 def predict_fn(input_object, model):
     logger.info("predict_fn")
     logger.info(f"input_object: {input_object}")
