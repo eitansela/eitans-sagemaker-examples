@@ -22,3 +22,5 @@ pytorch_script_mode_training_and_serving/data/cifar-10-batches-py/readme.html
 pytorch_script_mode_training_and_serving/data/cifar-10-batches-py/test_batch
 pytorch_script_mode_training_and_serving/data/cifar-10-python.tar.gz
 pytorch_script_mode_training_and_serving/__pycache__/utils_cifar.cpython-38.pyc
+scikit_learn_script_mode_no_model_artifact/dummy.model
+scikit_learn_script_mode_no_model_artifact/model.tar.gz
