@@ -25,7 +25,7 @@ def map_batch_feature_name_value(records, feature_definitions):
     return result_dict
 
 
-def get_record_df(**kwargs):
+def get_record_to_df(**kwargs):
     feature_group_name = kwargs["FeatureGroupName"]
     record_identifier_value_as_string = str(kwargs["RecordIdentifierValueAsString"])
     record = featurestore_runtime.get_record(FeatureGroupName=feature_group_name, RecordIdentifierValueAsString=record_identifier_value_as_string)["Record"]
@@ -34,7 +34,7 @@ def get_record_df(**kwargs):
     return(df)
 
 
-def batch_get_records_df(**kwargs):
+def batch_get_records_to_df(**kwargs):
     feature_group_name = kwargs["FeatureGroupName"]
     record_identifiers_value_as_string = kwargs["RecordIdentifiersValueAsString"]
     
