@@ -25,6 +25,13 @@ def map_batch_feature_name_value(records, feature_definitions):
     return result_dict
 
 
+# Cast object dtype to string. The SageMaker FeatureStore Python SDK will then map the string dtype to String feature type.
+def cast_object_to_string(data_frame):
+    for label in data_frame.columns:
+        if data_frame.dtypes[label] == "object":
+            data_frame[label] = data_frame[label].astype("str").astype("string")
+            
+            
 # Retrieves the latest records stored in the OnlineStore and returns a DataFrame.
 def get_record_to_df(**kwargs):
     feature_group_name = kwargs["FeatureGroupName"]
