@@ -25,15 +25,21 @@ def map_batch_feature_name_value(records, feature_definitions):
     return result_dict
 
 
+# Retrieves the latest records stored in the OnlineStore and returns a DataFrame.
 def get_record_to_df(**kwargs):
     feature_group_name = kwargs["FeatureGroupName"]
     record_identifier_value_as_string = str(kwargs["RecordIdentifierValueAsString"])
-    record = featurestore_runtime.get_record(FeatureGroupName=feature_group_name, RecordIdentifierValueAsString=record_identifier_value_as_string)["Record"]
-    record_as_dict = map_feature_name_value(record)
-    df = pd.DataFrame(data=record_as_dict)
-    return(df)
+    response = featurestore_runtime.get_record(FeatureGroupName=feature_group_name, RecordIdentifierValueAsString=record_identifier_value_as_string)
+    if "Record" in response:
+        record = response["Record"]
+        record_as_dict = map_feature_name_value(record)
+        df = pd.DataFrame(data=record_as_dict)
+        return(df)
+    else:
+        return None
 
-
+    
+# Retrieves a batch of Records from a single FeatureGroup OnlineStore and returns a DataFrame.
 def batch_get_records_to_df(**kwargs):
     feature_group_name = kwargs["FeatureGroupName"]
     record_identifiers_value_as_string = kwargs["RecordIdentifiersValueAsString"]
@@ -50,7 +56,10 @@ def batch_get_records_to_df(**kwargs):
     identifiers.append(item)
     
     batch_get_record_response = featurestore_runtime.batch_get_record(Identifiers=identifiers)
-    records = batch_get_record_response['Records']
-    records_as_dict = map_batch_feature_name_value(records, feature_definitions)
-    df = pd.DataFrame(data=records_as_dict)
-    return(df)
+    if "Records" in batch_get_record_response:
+        records = batch_get_record_response["Records"]
+        records_as_dict = map_batch_feature_name_value(records, feature_definitions)
+        df = pd.DataFrame(data=records_as_dict)
+        return(df)
+    else:
+        return None
