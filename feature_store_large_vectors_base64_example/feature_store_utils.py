@@ -2,6 +2,7 @@ import boto3
 import pandas as pd
 import numpy as np 
 import base64
+import math
 
 
 boto_session = boto3.Session()
@@ -79,9 +80,17 @@ def encode_vector_features(df, vector_features_list):
     for vector_feature in vector_features_list:
         df[vector_feature] = df[vector_feature].apply(lambda embeddings: base64.b64encode(embeddings))
 
+        
+def decode_vector_feature(feature):
+    if not isinstance(feature, str) and math.isnan(feature):
+        return float('NaN')
+    else:
+        feature = np.frombuffer(base64.decodebytes(bytes(feature[2:-1].encode())))
+        return(feature)
+    
 
 # Decode vector features from base64
 def decode_vector_features(df, vector_features_list):
     for vector_feature in vector_features_list:
-        df[vector_feature] = df[vector_feature].apply(lambda embeddings: np.frombuffer(base64.decodebytes(bytes(embeddings[2:-1].encode()))))
+        df[vector_feature] = df[vector_feature].apply(decode_vector_feature)
 
