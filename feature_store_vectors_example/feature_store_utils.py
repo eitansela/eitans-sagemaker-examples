@@ -79,12 +79,13 @@ def encode_vector_features(df, vector_features_list):
 
 def decode_vector_feature(feature):
     if not isinstance(feature, str) and math.isnan(feature):
-        return float('NaN')
+        return None
     else:
-        feature = np.frombuffer(base64.decodebytes(bytes(feature[2:-1].encode())))
-        return (feature)
+        decoded_feature = base64.decodebytes(bytes(feature[2:-1].encode()))
+        return (decoded_feature)
 
 def decode_vector_features(df, vector_features_list):
     """"Decode vector features from base64."""
     for vector_feature in vector_features_list:
-        df[vector_feature] = df[vector_feature].apply(decode_vector_feature)
+        df[vector_feature['name']] = df[vector_feature['name']].apply(decode_vector_feature)
+        df[vector_feature['name']] = df[vector_feature['name']].apply(lambda x: np.frombuffer(x, dtype=vector_feature['type']) if x is not None else None)
