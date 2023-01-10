@@ -2,7 +2,7 @@
 # This is a Python 3 image that uses the nginx, gunicorn, flask stack
 # for serving inferences in a stable way.
 
-FFROM python:3.7-slim-buster
+FROM public.ecr.aws/docker/library/python:3.7.14-slim-buster
 
 RUN apt-get -y update && apt-get install -y --no-install-recommends \
          wget \
